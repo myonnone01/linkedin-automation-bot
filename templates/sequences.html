@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Sequences{% endblock %}
+{% block mobile_title %}Sequences{% endblock %}
+{% block content %}
+<section class="bg-white rounded-xl shadow p-4 md:p-6 mb-4">
+  <h2 class="text-lg font-semibold mb-3">New sequence</h2>
+  <form id="sequence-form" class="grid gap-3 md:grid-cols-3">
+    <input type="text" name="name" placeholder="Sequence name" required
+           class="md:col-span-1 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+    <input type="text" name="segment_role_keywords" placeholder="Role keywords (comma-separated)"
+           class="md:col-span-1 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+    <input type="text" name="segment_seniority" placeholder="Seniority"
+           class="md:col-span-1 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+    <button type="submit"
+            class="tap bg-linkedin hover:bg-linkedin-dark text-white font-semibold rounded-lg px-4 py-3 md:col-span-3">
+      Create sequence
+    </button>
+  </form>
+</section>
+
+<section class="space-y-4">
+  {% if not sequences %}
+    <p class="text-sm text-slate-500">No sequences yet. Create one above.</p>
+  {% endif %}
+  {% for s in sequences %}
+    <div class="bg-white rounded-xl shadow p-4 md:p-6" data-sequence-id="{{ s.id }}">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <div class="font-semibold text-lg">{{ s.name }}</div>
+          <div class="text-xs text-slate-500">
+            {% if s.segment_seniority %}{{ s.segment_seniority }}{% endif %}
+            {% if s.segment_role_keywords %} • {{ s.segment_role_keywords }}{% endif %}
+          </div>
+        </div>
+        <button class="tap text-sm text-rose-600 font-semibold delete-sequence">Delete</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-xs text-slate-500 uppercase border-b border-slate-200">
+            <tr>
+              <th class="py-2 text-left">#</th>
+              <th class="py-2 text-left">Delay (days)</th>
+              <th class="py-2 text-left">Delivery</th>
+              <th class="py-2 text-left">Template</th>
+              <th class="py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for step in s.steps %}
+              <tr class="border-b border-slate-100">
+                <td class="py-2 font-semibold">{{ step.step_number }}</td>
+                <td class="py-2">{{ step.delay_days }}</td>
+                <td class="py-2">{{ step.delivery_method }}</td>
+                <td class="py-2 text-slate-600">
+                  {% set tpl = templates | selectattr('id', 'equalto', step.template_id) | list | first %}
+                  {{ tpl.name if tpl else '—' }}
+                </td>
+                <td class="py-2 text-right">
+                  <button class="text-xs text-rose-600 delete-step" data-step-id="{{ step.id }}">Remove</button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <form class="add-step-form mt-3 grid gap-2 md:grid-cols-5">
+        <input type="number" name="step_number" min="1" placeholder="Step #" required
+               class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        <input type="number" name="delay_days" min="0" placeholder="Delay (days)" required
+               class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        <select name="delivery_method" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <option value="connect_no_note">Connect (no note)</option>
+          <option value="connection_note">Connection note</option>
+          <option value="linkedin_message">LinkedIn message</option>
+          <option value="inmail">InMail</option>
+        </select>
+        <select name="template_id" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <option value="">— No template (connect only) —</option>
+          {% for t in templates %}
+            <option value="{{ t.id }}">{{ t.name }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="tap bg-linkedin hover:bg-linkedin-dark text-white font-semibold rounded-lg px-3 py-2">
+          + Add step
+        </button>
+      </form>
+    </div>
+  {% endfor %}
+</section>
+
+<script>
+  initSequencesPage();
+</script>
+{% endblock %}

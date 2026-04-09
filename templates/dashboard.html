@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block mobile_title %}Dashboard{% endblock %}
+{% block content %}
+<div class="grid gap-4 md:grid-cols-2">
+  <!-- Left column: start form + stats -->
+  <div class="space-y-4">
+    <section class="bg-white rounded-xl shadow p-4 md:p-6">
+      <h2 class="text-lg font-semibold mb-3">Start a session</h2>
+      <form id="start-form" class="space-y-3">
+        <div>
+          <label class="block text-sm font-medium mb-1">Sales Navigator URL</label>
+          <input type="text" name="source_url" placeholder="https://www.linkedin.com/sales/search/people?..."
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-linkedin focus:outline-none">
+          <p class="text-xs text-slate-500 mt-1">Search URL or saved lead list URL (optional if processing due follow-ups only)</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Sequence</label>
+          <select name="sequence_id"
+                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="">— None (processing due only) —</option>
+            {% for s in sequences %}
+              <option value="{{ s.id }}">{{ s.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Daily limit</label>
+          <input type="number" name="daily_limit" min="1" max="25" value="{{ daily_limit }}"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        </div>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox" name="connect_only" class="w-5 h-5 rounded">
+          <span>Connect only (no message, skips sequences and Claude)</span>
+        </label>
+        <div class="flex gap-2 pt-2">
+          <button type="submit" id="start-btn"
+                  class="tap flex-1 bg-linkedin hover:bg-linkedin-dark text-white font-semibold rounded-lg px-4 py-3">
+            ▶ Start
+          </button>
+          <button type="button" id="stop-btn"
+                  class="tap flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg px-4 py-3">
+            ■ Stop
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="bg-white rounded-xl shadow p-4 md:p-6">
+      <h2 class="text-lg font-semibold mb-3">Today</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="stats-grid">
+        <div class="bg-emerald-50 rounded-lg p-3 text-center">
+          <div class="text-2xl font-bold text-emerald-700" data-stat="sent">–</div>
+          <div class="text-xs text-slate-600">Sent</div>
+        </div>
+        <div class="bg-amber-50 rounded-lg p-3 text-center">
+          <div class="text-2xl font-bold text-amber-700" data-stat="skipped">–</div>
+          <div class="text-xs text-slate-600">Skipped</div>
+        </div>
+        <div class="bg-rose-50 rounded-lg p-3 text-center">
+          <div class="text-2xl font-bold text-rose-700" data-stat="failed">–</div>
+          <div class="text-xs text-slate-600">Failed</div>
+        </div>
+        <div class="bg-slate-100 rounded-lg p-3 text-center">
+          <div class="text-2xl font-bold text-slate-700" data-stat="total">–</div>
+          <div class="text-xs text-slate-600">Total</div>
+        </div>
+      </div>
+      <div class="mt-3 flex justify-between text-xs text-slate-600">
+        <span>InMail credits: <strong id="inmail-credits">–</strong></span>
+        <span>Session: <strong id="session-status">idle</strong></span>
+      </div>
+    </section>
+  </div>
+
+  <!-- Right column: live log -->
+  <section class="bg-white rounded-xl shadow p-4 md:p-6 flex flex-col min-h-[400px]">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-semibold">Live log</h2>
+      <span class="flex items-center gap-1 text-xs text-slate-500">
+        <span id="sse-dot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+        <span id="sse-label">connecting…</span>
+      </span>
+    </div>
+    <div id="log-feed" class="flex-1 overflow-y-auto max-h-[60vh] font-mono text-xs bg-slate-950 text-slate-200 rounded-lg p-3 space-y-1">
+      <div class="text-slate-500">Waiting for events…</div>
+    </div>
+  </section>
+</div>
+
+<script>
+  initDashboard();
+</script>
+{% endblock %}

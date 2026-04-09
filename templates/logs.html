@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Logs & Export{% endblock %}
+{% block mobile_title %}Logs{% endblock %}
+{% block content %}
+<section class="bg-white rounded-xl shadow p-4 md:p-6 mb-4">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold">Message history</h2>
+    <a href="/api/export/csv"
+       class="tap bg-linkedin hover:bg-linkedin-dark text-white font-semibold rounded-lg px-4 py-2 text-sm">
+      ⬇ Export CSV
+    </a>
+  </div>
+</section>
+
+<section class="bg-white rounded-xl shadow overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+        <tr>
+          <th class="px-3 py-2 text-left">When</th>
+          <th class="px-3 py-2 text-left">Contact</th>
+          <th class="px-3 py-2 text-left">Delivery</th>
+          <th class="px-3 py-2 text-left">Status</th>
+          <th class="px-3 py-2 text-left">Message</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in messages %}
+          <tr class="border-b border-slate-100 align-top">
+            <td class="px-3 py-2 text-xs text-slate-500 whitespace-nowrap">{{ m.timestamp }}</td>
+            <td class="px-3 py-2">
+              <div class="font-semibold">{{ m.full_name or '—' }}</div>
+              <div class="text-xs text-slate-500">{{ m.title or '' }} @ {{ m.company or '' }}</div>
+            </td>
+            <td class="px-3 py-2 text-xs">{{ m.delivery_method }}</td>
+            <td class="px-3 py-2">
+              {% set color = {
+                'sent': 'bg-emerald-100 text-emerald-800',
+                'skipped': 'bg-amber-100 text-amber-800',
+                'failed': 'bg-rose-100 text-rose-800',
+                'replied': 'bg-blue-100 text-blue-800',
+                'already_connected': 'bg-slate-100 text-slate-800',
+                'credits_exhausted': 'bg-rose-100 text-rose-800',
+                'inmail_unavailable': 'bg-amber-100 text-amber-800',
+                'sequence_complete': 'bg-slate-100 text-slate-800',
+              }[m.status] or 'bg-slate-100 text-slate-800' %}
+              <span class="inline-block px-2 py-0.5 rounded-full text-xs {{ color }}">{{ m.status }}</span>
+            </td>
+            <td class="px-3 py-2 text-xs text-slate-700 max-w-md">
+              <div class="line-clamp-3">{{ m.ai_message }}</div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
