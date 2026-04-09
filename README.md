@@ -38,8 +38,15 @@ Use at your own risk, on your own account, with realistic volume.
    opens the dashboard in your default browser.
 4. On your iPhone (same Wi-Fi), open Safari to the phone URL printed in the
    terminal, e.g. `http://192.168.1.42:5000`.
-5. In the Templates tab, create one or more prompt templates. In the Sequences
-   tab, build a sequence (e.g. Day 0 connect → Day 3 message → Day 7 follow-up).
+5. (Optional) Run **`python seed.py`** inside the activated venv to populate
+   the database with 5 starter templates and 3 starter sequences (IT Director
+   4-step, VP Engineering 3-step, and a plain "Network growth" connect-only
+   sequence). The script is idempotent — safe to re-run. You can edit or
+   delete everything from the UI afterwards.
+
+   If you'd rather build from scratch: open the Templates tab, create one or
+   more prompt templates, then go to the Sequences tab and build a sequence
+   (e.g. Day 0 connect → Day 3 message → Day 7 follow-up).
 6. On the Dashboard, paste a Sales Navigator search URL or saved list URL, pick
    a sequence, and click **Start**.
 7. The first time you run it, a Chromium window will open. Log into LinkedIn
