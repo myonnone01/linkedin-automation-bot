@@ -1,5 +1,7 @@
 # LinkedIn Sales Navigator Automation Bot
 
+> **First time here? Read [GETTING_STARTED.md](GETTING_STARTED.md) for a non-technical step-by-step walkthrough — including a one-paste PowerShell installer.**
+
 Personal sales-outreach automation tool for LinkedIn Sales Navigator. Runs on
 your Windows laptop, controlled from either the laptop or your iPhone via a
 responsive web UI on your local network.
