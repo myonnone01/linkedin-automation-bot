@@ -75,11 +75,54 @@ def send_connect_no_note(page: Page, lead: dict) -> str:
     return "failed"
 
 
+def _fill_text_area(page, selector: str, text: str) -> bool:
+    """Robustly fill a textarea or contenteditable.
+
+    LinkedIn's new "Draft with AI" placeholder overlay can intercept
+    clicks on the underlying textarea. We handle that by:
+      1. Trying force=True click + human-like typing (best for stealth)
+      2. Falling back to .fill() which bypasses overlays entirely
+      3. Last resort: JavaScript value setter + input event
+    Returns True if the text was successfully entered.
+    """
+    try:
+        loc = page.locator(selector).first
+        try:
+            loc.click(force=True, timeout=5_000)
+            humanize.type_like_human(loc, text)
+            return True
+        except Exception:
+            pass
+        # Fallback 1: fill() bypasses overlays
+        try:
+            loc.fill(text, timeout=5_000)
+            return True
+        except Exception:
+            pass
+        # Fallback 2: JS direct value set + dispatch input event
+        try:
+            loc.evaluate(
+                "(el, val) => { el.value = val; "
+                "el.dispatchEvent(new Event('input', {bubbles: true})); "
+                "el.dispatchEvent(new Event('change', {bubbles: true})); }",
+                text,
+            )
+            return True
+        except Exception:
+            return False
+    except Exception:
+        return False
+
+
 def send_connection_note(page: Page, lead: dict, text: str) -> str:
     if not text:
         return "failed"
     if len(text) > config.CONNECTION_NOTE_LIMIT:
         text = text[: config.CONNECTION_NOTE_LIMIT]
+    # Skip already-connected leads — connection_note doesn't apply
+    if lead.get("is_connected"):
+        bus.info(f"Already 1st-degree connected: {lead.get('full_name')}")
+        return "already_connected"
     if sales_nav.already_invited(page):
         return "already_connected"
 
@@ -96,12 +139,8 @@ def send_connection_note(page: Page, lead: dict, text: str) -> str:
     except Exception:
         pass
 
-    try:
-        textarea = page.locator("textarea[name='message'], textarea").first
-        textarea.click()
-        humanize.type_like_human(textarea, text)
-    except Exception as exc:
-        bus.warn(f"Could not type note: {exc}")
+    if not _fill_text_area(page, "textarea[name='message'], textarea", text):
+        bus.warn(f"Could not type note for {lead.get('full_name')}")
         return "failed"
 
     humanize.click_delay()
@@ -129,12 +168,8 @@ def send_linkedin_message(page: Page, lead: dict, text: str) -> str:
         bus.warn(f"Message button not found for {lead.get('full_name')}")
         return "failed"
 
-    try:
-        body = page.locator("div[contenteditable='true']").first
-        body.click()
-        humanize.type_like_human(body, text)
-    except Exception as exc:
-        bus.warn(f"Could not type message: {exc}")
+    if not _fill_text_area(page, "div[contenteditable='true']", text):
+        bus.warn(f"Could not type message for {lead.get('full_name')}")
         return "failed"
 
     humanize.click_delay()
@@ -176,12 +211,8 @@ def send_inmail(page: Page, lead: dict, text: str) -> str:
     except Exception:
         pass
 
-    try:
-        body = page.locator("textarea, div[contenteditable='true']").first
-        body.click()
-        humanize.type_like_human(body, text)
-    except Exception as exc:
-        bus.warn(f"Could not type InMail body: {exc}")
+    if not _fill_text_area(page, "textarea, div[contenteditable='true']", text):
+        bus.warn(f"Could not type InMail body for {lead.get('full_name')}")
         return "failed"
 
     humanize.click_delay()
