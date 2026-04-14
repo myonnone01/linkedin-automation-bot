@@ -57,20 +57,29 @@ SELECTORS = {
 
 def ensure_logged_in(page: Page) -> None:
     """Navigate to Sales Nav; if login is required, drive the form and wait
-    (up to 3 minutes) for the user to complete any 2FA manually."""
+    (up to 3 minutes) for the user to complete any 2FA manually.
+
+    Detection is URL-based rather than DOM-selector-based because LinkedIn
+    changes its DOM frequently but the URL structure is stable: any page
+    under /sales/* that's not /sales/login* means we're authenticated.
+    """
     bus.info("Opening Sales Navigator…")
     page.goto("https://www.linkedin.com/sales/home", wait_until="domcontentloaded")
     humanize.click_delay()
+    bus.info(f"Landed at: {page.url}")
 
-    if "/sales/home" in page.url or "/sales/" in page.url:
+    def _is_sales_nav(url: str) -> bool:
+        return "/sales/" in url and "login" not in url and "checkpoint" not in url
+
+    if _is_sales_nav(page.url):
         try:
-            page.wait_for_selector(SELECTORS["home_marker"], timeout=8_000)
-            bus.success("Sales Navigator session already active")
-            return
+            page.wait_for_load_state("networkidle", timeout=10_000)
         except PWTimeout:
             pass
+        bus.success("Sales Navigator session active")
+        return
 
-    # Still on login page or got bounced to checkpoint
+    # On login page — try auto-fill, then wait for user to complete 2FA
     if "login" in page.url or "checkpoint" in page.url or "uas/login" in page.url:
         if config.LINKEDIN_EMAIL and config.LINKEDIN_PASSWORD:
             bus.info("Filling login form")
@@ -89,23 +98,25 @@ def ensure_logged_in(page: Page) -> None:
         )
         deadline = time.time() + 180
         while time.time() < deadline:
-            if "/sales/" in page.url and "login" not in page.url:
-                try:
-                    page.wait_for_selector(SELECTORS["home_marker"], timeout=3_000)
-                    bus.success("Logged in to Sales Navigator")
-                    return
-                except PWTimeout:
-                    pass
+            if _is_sales_nav(page.url):
+                bus.success(f"Logged in to Sales Navigator (url={page.url})")
+                return
             time.sleep(2)
         raise RuntimeError("Login timeout — 2FA or security challenge not completed")
 
-    # Some other page — try once more
+    # Some other page (LinkedIn feed, error, interstitial) — try once more
+    bus.warn(f"Unexpected landing page: {page.url} — navigating again")
     page.goto("https://www.linkedin.com/sales/home", wait_until="domcontentloaded")
-    try:
-        page.wait_for_selector(SELECTORS["home_marker"], timeout=15_000)
-        bus.success("Logged in to Sales Navigator")
-    except PWTimeout:
-        raise RuntimeError("Could not reach Sales Navigator home")
+    humanize.click_delay()
+    bus.info(f"Retry landed at: {page.url}")
+    if _is_sales_nav(page.url):
+        try:
+            page.wait_for_load_state("networkidle", timeout=10_000)
+        except PWTimeout:
+            pass
+        bus.success("Sales Navigator session active")
+        return
+    raise RuntimeError(f"Could not reach Sales Navigator home (final url: {page.url})")
 
 
 # ---------- InMail credits ----------
