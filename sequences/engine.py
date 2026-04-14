@@ -173,8 +173,12 @@ def _process_due(page, daily_cap: int) -> int:
         )
         actions += 1
 
-        if status == "sent":
-            # Advance to next step
+        if status == "sent" or status == "already_connected":
+            # Advance to next step.
+            # "already_connected" means the current step doesn't apply to
+            # this lead (e.g. connection_note when they're already a 1st-degree
+            # connection). Auto-advance to the next step so the next sweep
+            # tries something different (typically a linkedin_message step).
             next_next_step = db.get_step(sequence_id, next_step_number + 1)
             if next_next_step:
                 next_dt = datetime.utcnow() + timedelta(days=next_next_step["delay_days"])
