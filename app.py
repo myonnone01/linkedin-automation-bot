@@ -1,7 +1,7 @@
 """Flask entrypoint.
 
 Starts the web server, prints LAN access URLs, and (on Windows) auto-opens
-the dashboard in the default browser. No background scheduler — the
+the dashboard in the default browser. No background scheduler - the
 automation engine only runs when the user clicks Start in the UI.
 """
 import socket
@@ -20,7 +20,7 @@ from routes import dashboard, exports, runs, sequences_api, templates_api
 def detect_lan_ip() -> str:
     """Best-effort local network IP detection.
 
-    Opens a UDP socket to a public IP — doesn't actually send any traffic —
+    Opens a UDP socket to a public IP - doesn't actually send any traffic -
     so the OS routing table tells us which local interface would be used.
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

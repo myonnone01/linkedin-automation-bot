@@ -15,7 +15,7 @@ from automation import browser, humanize, messaging, sales_nav
 from logger import bus
 
 
-# Session control — one session at a time.
+# Session control - one session at a time.
 _session_lock = threading.Lock()
 _cancel_flag = threading.Event()
 _session_running = threading.Event()
@@ -27,7 +27,7 @@ def is_running() -> bool:
 
 def request_cancel() -> None:
     _cancel_flag.set()
-    bus.warn("Cancel requested — session will stop after current action")
+    bus.warn("Cancel requested - session will stop after current action")
 
 
 def _check_cancelled() -> bool:
@@ -100,7 +100,7 @@ def _process_due(page, daily_cap: int) -> int:
         bus.info("No contacts due")
         return 0
 
-    bus.info(f"{len(due)} contacts due — processing up to {daily_cap}")
+    bus.info(f"{len(due)} contacts due - processing up to {daily_cap}")
     actions = 0
     for row in due:
         if _check_cancelled() or actions >= daily_cap:
@@ -111,7 +111,7 @@ def _process_due(page, daily_cap: int) -> int:
         next_step_number = current_step + 1
         step = db.get_step(sequence_id, next_step_number)
         if not step:
-            # No more steps — mark completed
+            # No more steps - mark completed
             db.advance_contact(row["id"], current_step, None, completed=True)
             db.log_message(
                 lead_id=row["lead_id"],
@@ -157,7 +157,7 @@ def _process_due(page, daily_cap: int) -> int:
                 ai_message="",
                 status="replied",
             )
-            bus.success(f"Reply detected from {lead['full_name']} — marking sequence replied")
+            bus.success(f"Reply detected from {lead['full_name']} - marking sequence replied")
             continue
 
         template = _match_template_for_step(step)
@@ -235,7 +235,7 @@ def run_session(
 ) -> None:
     """Top-level entry point for a worker thread."""
     if not _session_lock.acquire(blocking=False):
-        bus.warn("Another session is already running — refusing to start")
+        bus.warn("Another session is already running - refusing to start")
         return
 
     _cancel_flag.clear()

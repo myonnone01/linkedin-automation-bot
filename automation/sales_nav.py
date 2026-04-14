@@ -63,7 +63,7 @@ def ensure_logged_in(page: Page) -> None:
     changes its DOM frequently but the URL structure is stable: any page
     under /sales/* that's not /sales/login* means we're authenticated.
     """
-    bus.info("Opening Sales Navigator…")
+    bus.info("Opening Sales Navigator...")
     page.goto("https://www.linkedin.com/sales/home", wait_until="domcontentloaded")
     humanize.click_delay()
     bus.info(f"Landed at: {page.url}")
@@ -79,7 +79,7 @@ def ensure_logged_in(page: Page) -> None:
         bus.success("Sales Navigator session active")
         return
 
-    # On login page — try auto-fill, then wait for user to complete 2FA
+    # On login page - try auto-fill, then wait for user to complete 2FA
     if "login" in page.url or "checkpoint" in page.url or "uas/login" in page.url:
         if config.LINKEDIN_EMAIL and config.LINKEDIN_PASSWORD:
             bus.info("Filling login form")
@@ -93,7 +93,7 @@ def ensure_logged_in(page: Page) -> None:
                 bus.warn(f"Could not auto-fill login form: {exc}")
 
         bus.warn(
-            "WAITING FOR 2FA — complete any security challenge in the Chromium "
+            "WAITING FOR 2FA - complete any security challenge in the Chromium "
             "window. Waiting up to 3 minutes for you to reach Sales Navigator."
         )
         deadline = time.time() + 180
@@ -102,10 +102,10 @@ def ensure_logged_in(page: Page) -> None:
                 bus.success(f"Logged in to Sales Navigator (url={page.url})")
                 return
             time.sleep(2)
-        raise RuntimeError("Login timeout — 2FA or security challenge not completed")
+        raise RuntimeError("Login timeout - 2FA or security challenge not completed")
 
-    # Some other page (LinkedIn feed, error, interstitial) — try once more
-    bus.warn(f"Unexpected landing page: {page.url} — navigating again")
+    # Some other page (LinkedIn feed, error, interstitial) - try once more
+    bus.warn(f"Unexpected landing page: {page.url} - navigating again")
     page.goto("https://www.linkedin.com/sales/home", wait_until="domcontentloaded")
     humanize.click_delay()
     bus.info(f"Retry landed at: {page.url}")

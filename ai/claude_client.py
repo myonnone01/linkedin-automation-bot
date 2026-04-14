@@ -71,7 +71,7 @@ def _postprocess(text: str, limit: int) -> tuple[str, bool]:
     text = re.sub(r"\n{3,}", "\n\n", text)
     truncated = False
     if limit and len(text) > limit:
-        text = text[: limit - 1].rstrip() + "…"
+        text = text[: limit - 1].rstrip() + "..."
         truncated = True
     return text, truncated
 
@@ -80,7 +80,7 @@ def generate_message(lead: dict, template: dict, delivery_method: str) -> str:
     """Ask Claude to write a personalized message for this lead + template.
 
     Returns the final, char-limited message body. Never returns an empty string
-    for methods that require a message — raises on API failure so the caller
+    for methods that require a message - raises on API failure so the caller
     can log `failed` and skip the send.
     """
     limit = config.DELIVERY_CHAR_LIMITS.get(delivery_method, 500)
@@ -92,14 +92,14 @@ def generate_message(lead: dict, template: dict, delivery_method: str) -> str:
     if buying_signal and buying_signal != "none":
         signal_instruction = (
             f"\n\nIMPORTANT: This lead has a buying signal: '{buying_signal}'. "
-            "Open the message by referencing this signal naturally — do not "
+            "Open the message by referencing this signal naturally - do not "
             "mention the word 'signal' itself."
         )
 
     delivery_guidance = {
         config.DELIVERY_CONNECTION_NOTE: (
             "This is a LinkedIn connection request note. Keep it under "
-            f"{limit} characters. Be warm and brief — one or two sentences."
+            f"{limit} characters. Be warm and brief - one or two sentences."
         ),
         config.DELIVERY_LINKEDIN_MESSAGE: (
             "This is a LinkedIn direct message to a 1st-degree connection. "
@@ -118,7 +118,7 @@ def generate_message(lead: dict, template: dict, delivery_method: str) -> str:
         f"{signal_instruction}\n\n"
         "Write ONLY the message body, no preamble, no subject line, no quotes, "
         "no sign-off beyond 'Mike' if appropriate. Do not use em-dashes. Do not "
-        "start with 'Hi' followed by something generic — lead with relevance."
+        "start with 'Hi' followed by something generic - lead with relevance."
     )
 
     client = _get_client()

@@ -31,7 +31,7 @@ STARTER_TEMPLATES = [
             "Presidio has helped similar {{company}}-sized IT orgs modernize "
             "their infrastructure and security stack. Keep it under 300 "
             "characters to leave room for warmth. Do NOT pitch in the note "
-            "itself — just open the door."
+            "itself - just open the door."
         ),
     },
     {
@@ -55,7 +55,7 @@ STARTER_TEMPLATES = [
         "message_angle": (
             "Open with any buying signal ({{buying_signal}}) if present. "
             "For VP Engineering contacts, focus on platform reliability, "
-            "developer productivity, and cloud cost optimization — NOT "
+            "developer productivity, and cloud cost optimization - NOT "
             "cybersecurity or managed services pitches. Mention Presidio's "
             "cloud engineering practice. Under 300 characters."
         ),
@@ -71,7 +71,7 @@ STARTER_TEMPLATES = [
             "acknowledging the weight of their role. Reference one current, "
             "plausible strategic priority in the {{company}} industry. "
             "Mention Presidio's work with a peer company (no names). "
-            "Close with a low-pressure ask — a 15-minute point-of-view call. "
+            "Close with a low-pressure ask - a 15-minute point-of-view call. "
             "Keep to 4-6 sentences. Sign off as Mike."
         ),
     },
@@ -149,7 +149,7 @@ def _sequence_id_by_name(name: str) -> int | None:
 
 def seed() -> None:
     db.init_db()
-    print("Seeding database with starter templates and sequences…")
+    print("Seeding database with starter templates and sequences...")
 
     existing_templates = {t["name"] for t in db.list_templates()}
     for tpl in STARTER_TEMPLATES:
